@@ -6,6 +6,7 @@ const app = express();
 const input = require("input");
 const cors = require('cors');
 const fs = require('fs');
+const users = require('./users.json')
 
 app.use(cors());
 app.set('trust proxy', 2);
@@ -67,7 +68,12 @@ const telegram = new TelegramClient(stringSession, apiId, apiHash, {
 
 //FIM
 
-app.get("/:type/:q/", async (req, res) => {
+app.get("/:type/:q", async (req, res) => {
+const apiKey = req.query.apiKey;
+if (!apiKey) { return res.status(401).json({error: '➭ Chave da API ausente. Coloque sua api-key, caso não tenha compre a sua já. Proprietário: Wa.me//5511992375831'})}
+const user = users.find((user) => user.apiKey === apiKey);
+if (!user) { return res.status(403).json({error: '➭ Chave da API inválida ou você não possui uma api-key' })}
+
 	var db = JSON.parse(fs.readFileSync("db.json"));
     var achou2 = false;
 	const type = req.params.type.toLowerCase() || '';
@@ -182,6 +188,7 @@ app.get("/:type/:q/", async (req, res) => {
 					str = str.replace(/🔍 CONSULTA DE CPF3 COMPLETA 🔍/gi, "CONSULTA DE CPF ");
 					str = str.replace(/🔍 CONSULTA DE CPF 4 🔍/gi, "CONSULTA DE CPF ");
                     str = str.replace(/BY: @MkBuscasRobot/gi, "");
+                    str = str.replace(/USUÁRIO: teddy/gi, "");
 					str = str.replace(/\n\nUSUÁRIO: NT CONSULTA/gi, '');
 					str = str.replace(/USUÁRIO: NT CONSULTA\n\n/gi, '');
 					str = str.replace(/ USUÁRIO: NT CONSULTA/gi, '');
@@ -271,3 +278,4 @@ fs.watchFile(file, () => {
 	delete require.cache[file]
 	require(file)
 })
+	
